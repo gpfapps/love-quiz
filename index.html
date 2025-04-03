@@ -1,0 +1,34 @@
+// Replace your existing generateQuiz click handler with this:
+document.getElementById("generateQuiz").addEventListener("click", async () => {
+  const quizContainer = document.getElementById("quiz");
+  const questionElement = document.getElementById("question");
+  const answersElement = document.getElementById("answers");
+
+  // Show loading state
+  questionElement.textContent = "Generating quiz...";
+  answersElement.innerHTML = "";
+  quizContainer.classList.remove("hidden");
+
+  try {
+    const response = await fetch("/api/generate-quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (!response.ok) throw new Error("Network error");
+
+    const { question, options, correctAnswer } = await response.json();
+    
+    // Display question and options
+    questionElement.textContent = question;
+    answersElement.innerHTML = options.map((option, index) => `
+      <button onclick="checkAnswer(${index}, '${correctAnswer}')">
+        ${String.fromCharCode(65 + index)}) ${option}
+      </button>
+    `).join("");
+
+  } catch (error) {
+    questionElement.textContent = "Error generating quiz. Try again.";
+    console.error(error);
+  }
+});
